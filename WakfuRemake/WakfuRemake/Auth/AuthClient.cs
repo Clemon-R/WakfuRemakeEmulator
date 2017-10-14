@@ -70,9 +70,9 @@ namespace WakfuRemake.Auth
             byte type = data.ReadByte();
             ushort id = data.ReadUShort();
             Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type}");
-            PacketTemplate packet = AuthHandler.getPackets().FirstOrDefault(elem => elem.Key == id).Value;
+            EventHandler packet = AuthHandler.getPackets().FirstOrDefault(elem => elem.Key == id).Value;
             if (packet != null)
-                packet.Decode(data, this);
+                packet.Invoke(new object[] {data, this },null);
             else
                 Console.WriteLine("Client -> Unknow ID: " + id);
         }
