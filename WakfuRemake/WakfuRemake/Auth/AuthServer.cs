@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using WakfuRemake.Common.Cyptography;
+using WakfuRemake.Common.Cryptography;
 
 namespace WakfuRemake.Auth
 {
@@ -24,6 +24,7 @@ namespace WakfuRemake.Auth
             this.serverSocket.Bind(lep);
             this.serverSocket.Listen(1000);
             AuthHandler.InitMessages();
+            CryptoManager.InitRSA();
         }
 
         public void Start()

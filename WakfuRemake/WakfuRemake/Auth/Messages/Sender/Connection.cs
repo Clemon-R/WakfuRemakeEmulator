@@ -5,11 +5,12 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using WakfuRemake.Common.BigEndian;
-using WakfuRemake.Common.Cyptography;
+using WakfuRemake.Common.Cryptography;
+using WakfuRemake.Common.Utils;
 
 namespace WakfuRemake.Auth.Messages.Sender
 {
-    public class Version
+    public class Connection
     {
         public static void SendVersion(AuthClient client)
         {
@@ -36,7 +37,7 @@ namespace WakfuRemake.Auth.Messages.Sender
         {
             BigEndianWriter packet = new BigEndianWriter();
             packet.WriteULong(0x8000000000000000);
-            packet.WriteBytes(Cryptography.GetPublicKey());
+            packet.WriteBytes(CryptoManager.RsaPublicKey.ToArray());
             SendPacket(client, packet, 1034);
         }
 
@@ -46,13 +47,11 @@ namespace WakfuRemake.Auth.Messages.Sender
             ushort len;
 
             //packet.WriteByte(0);
+            packet.WriteUShort(len = (ushort)(arg.Data.Length + 4));
             packet.WriteUShort(id);
 
             packet.WriteBytes(arg.Data);
-
-            packet.Seek(0, System.IO.SeekOrigin.Begin);
-            packet.WriteUShort(len = (ushort)packet.Data.Length);
-            Console.WriteLine($"Client -> Send ID: {id} Len: {len}");
+            Console.WriteLine($"Client -> Send ID: {id} Len: {len} = {packet.Data.ToHex()}");
             client.GetSocket().Send(packet.Data);
         }
     }

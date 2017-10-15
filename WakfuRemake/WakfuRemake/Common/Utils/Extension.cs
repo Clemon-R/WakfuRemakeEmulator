@@ -23,5 +23,12 @@ namespace WakfuRemake.Common.Utils
         {
             return (methods.FirstOrDefault(x => x.GetCustomAttribute<AuthIdentifier>() != null && x.GetCustomAttribute<AuthIdentifier>().getId() == id));
         }
+        public static string ToHex(this byte[] ba)
+        {
+            StringBuilder hex = new StringBuilder(ba.Length * 2);
+            foreach (byte b in ba)
+                hex.AppendFormat("{0:x2}", b);
+            return hex.ToString();
+        }
     }
 }

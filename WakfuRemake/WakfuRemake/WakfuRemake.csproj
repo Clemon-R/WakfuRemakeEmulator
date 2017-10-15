@@ -46,11 +46,12 @@
     <Compile Include="Auth\AuthHandler.cs" />
     <Compile Include="Auth\AuthServer.cs" />
     <Compile Include="Auth\Messages\Handler\Connection.cs" />
-    <Compile Include="Auth\Messages\Handler\Version.cs" />
-    <Compile Include="Auth\Messages\Sender\Version.cs" />
+    <Compile Include="Auth\Messages\Sender\Connection.cs" />
     <Compile Include="Common\BigEndian\BigEndianReader.cs" />
     <Compile Include="Common\BigEndian\BigEndianWriter.cs" />
-    <Compile Include="Common\Cyptography\Cryptography.cs" />
+    <Compile Include="Common\Cyptography\AsnKeyBuilder.cs" />
+    <Compile Include="Common\Cyptography\CryptoManager.cs" />
+    <Compile Include="Common\Cyptography\RSA.cs" />
     <Compile Include="Common\Packet.cs" />
     <Compile Include="Common\Utils\Extension.cs" />
     <Compile Include="Config.cs" />
