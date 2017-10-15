@@ -53,6 +53,7 @@ namespace WakfuRemake.Auth
         {
             Console.WriteLine("New connection");
             AuthClient client = new AuthClient(this.serverSocket.EndAccept(result));
+            this.allDone.Set();
         }
     }
 }

@@ -35,7 +35,8 @@ namespace WakfuRemake.Auth
             {
                 if (!this.socket.Connected){
                     Console.WriteLine("Client <- Close connection");
-                    this.socket.Close();
+                    this.socket?.Close();
+                    return;
                 }
                 Console.WriteLine("Client <- Reception packet");
                 byte[] data = packet.Bytes;
@@ -52,7 +53,7 @@ namespace WakfuRemake.Auth
                 }
                 else
                     packet.Bytes = data;
-                this.socket.BeginReceive(packet.Buff, 0, packet.Len, 0, new AsyncCallback(this.HandlerPacket), packet);
+                this.socket?.BeginReceive(packet.Buff, 0, packet.Len, 0, new AsyncCallback(this.HandlerPacket), packet);
             }
             catch (Exception e)
             {
@@ -69,7 +70,10 @@ namespace WakfuRemake.Auth
             ushort id = data.ReadUShort();
             Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type}");
             if (id != 7 && id != 1 && id != 1033)
-                data = CryptoManager.RSA.Decrypt(data.ReadBytes((int)data.BaseStream.Length), false);
+            {
+                uint size = data.ReadUInt();
+                data = CryptoManager.RSA.Decrypt(data.ReadBytes((int)data.BytesAvailable), false);
+            }
             MethodInfo function = null;
             AuthHandler.GetMessages().FirstOrDefault(x => (function = x.GetMethods().GetMessageMethod(id)) != null);
             if (function != null)

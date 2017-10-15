@@ -45,14 +45,38 @@ namespace WakfuRemake.Auth.Messages.Sender
         {
             BigEndianWriter packet = new BigEndianWriter();
             ushort len;
-
-            //packet.WriteByte(0);
+            
             packet.WriteUShort(len = (ushort)(arg.Data.Length + 4));
             packet.WriteUShort(id);
 
             packet.WriteBytes(arg.Data);
             Console.WriteLine($"Client -> Send ID: {id} Len: {len} = {packet.Data.ToHex()}");
             client.GetSocket().Send(packet.Data);
+        }
+
+        public static void SendStateConnection(AuthClient client, byte step, bool display, int countryId, bool connectedToServer)
+        {
+            BigEndianWriter packet = new BigEndianWriter();
+            packet.WriteByte(step); //Step
+            packet.WriteBoolean(display); //Display serveur
+            if (display)
+            {
+                packet.WriteInt(countryId); //0 FR
+                packet.WriteBoolean(connectedToServer); //Connecté au serveur
+                if (connectedToServer)
+                {
+                    packet.WriteInt(0); //Id account
+                    packet.WriteString("Clemon");//Pseudo
+                    packet.WriteInt(1); //Nombre de serveur
+                    for (int i = 0; i < 1; i++)
+                    {
+                        packet.WriteInt(12); //ID serveur
+                        packet.WriteInt(0);//Droit du serveur
+                    }
+                }
+                packet.WriteBytes(new byte[] { });//Inconnu
+            }
+            SendPacket(client, packet, 1027);
         }
     }
 }

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WakfuRemake.Common.BigEndian;
+using WakfuRemake.Common.Cryptography;
+using WakfuRemake.Common.Utils;
 
 namespace WakfuRemake.Auth.Messages.Handler
 {
@@ -35,6 +37,23 @@ namespace WakfuRemake.Auth.Messages.Handler
         {
             Console.WriteLine("Client <- Close connection");
             client.Close();
+        }
+
+        [AuthIdentifier(1026)]
+        public static void ReceptionLogin(BigEndianReader packet, AuthClient client)
+        {
+            ulong salt = packet.ReadULong();
+            string user = packet.ReadString();
+            string pass = packet.ReadString();
+            Console.WriteLine($"Client - Authentication User: {user} Pass: {pass} Salt: {salt}");
+            if (user == "test" && pass == "test")
+                Sender.Connection.SendStateConnection(client, 0, true, 0, false);
+            else
+                Sender.Connection.SendStateConnection(client, 2, false, 0, false);
+            /*ulong key = packet.ReadULong();
+            string user = packet.ReadString();
+            string pass = packet.ReadString();
+            Console.WriteLine($"Client <- Reception d'identification - Login: {user} Pass: {pass} Key: {key}");*/
         }
     }
 }
