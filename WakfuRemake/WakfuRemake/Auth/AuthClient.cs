@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WakfuRemake.Auth.Packets;
 using WakfuRemake.Common.BigEndian;
 using WakfuRemake.Common.Socket;
+using WakfuRemake.Common.Utils;
 
 namespace WakfuRemake.Auth
 {
@@ -19,10 +21,10 @@ namespace WakfuRemake.Auth
         {
             this.socket = socket;
             Packet packet = new Packet(8192);
-            this.socket.BeginReceive(packet.Buff, 0, 8191, SocketFlags.None, new AsyncCallback(this.handlerPacket), packet);
+            this.socket.BeginReceive(packet.Buff, 0, 8191, SocketFlags.None, new AsyncCallback(this.HandlerPacket), packet);
         }
 
-        private void handlerPacket(IAsyncResult result)
+        private void HandlerPacket(IAsyncResult result)
         {
             Packet packet = (Packet)result.AsyncState;
             int read = this.socket.EndReceive(result);
@@ -33,48 +35,44 @@ namespace WakfuRemake.Auth
                     Console.WriteLine("Client <- Close connection");
                     this.socket.Close();
                 }
+                Console.WriteLine("Client <- Reception packet");
+                byte[] data = packet.Bytes;
                 if (read > 0)
                 {
-                    Console.WriteLine("Client <- Reception packet");
-                    byte[] data = new byte[packet.Bytes.Length + read];
+                    data = new byte[packet.Bytes.Length + read];
                     Array.Copy(packet.Bytes, 0, data, 0, packet.Bytes.Length);
                     Array.Copy(packet.Buff, 0, data, packet.Bytes.Length, read);
-                    if (read < 8192)
-                    {
-                        this.dispatchPacket(new BigEndianReader(data));
-                        packet = new Packet(8192);
-                    }
-                    else
-                        packet.Bytes = data;
-                    this.socket.BeginReceive(packet.Buff, 0, packet.Len, 0, new AsyncCallback(this.handlerPacket), packet);
                 }
-                else if (read == 0 && packet.Bytes.Length > 0)
+                if (read < 8192 && data.Length > 0)
                 {
-                    Console.WriteLine("Client <- Reception final packet");
-                    this.dispatchPacket(new BigEndianReader(packet.Bytes));
+                    this.DispatchPacket(new BigEndianReader(data));
                     packet = new Packet(8192);
-                    this.socket.BeginReceive(packet.Buff, 0, packet.Len, 0, new AsyncCallback(this.handlerPacket), packet);
                 }
                 else
-                    this.Close();
-            }catch (Exception e)
+                    packet.Bytes = data;
+                this.socket.BeginReceive(packet.Buff, 0, packet.Len, 0, new AsyncCallback(this.HandlerPacket), packet);
+            }
+            catch (Exception e)
             {
                 Console.WriteLine("Client -> Closing client - Erreur : "+e.Message);
                 this.socket.Close();
             }
         }
 
-        private void dispatchPacket(BigEndianReader data)
+        private void DispatchPacket(BigEndianReader data)
         {
             ushort len = data.ReadUShort();
             byte type = data.ReadByte();
             ushort id = data.ReadUShort();
             Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type}");
-            EventHandler packet = AuthHandler.getPackets().FirstOrDefault(elem => elem.Key == id).Value;
-            if (packet != null)
-                packet.Invoke(new object[] {data, this },null);
+            MethodInfo function = null;
+            AuthHandler.GetMessages().FirstOrDefault(x => (function = x.GetMethods().GetMessageMethod(id)) != null);
+            if (function != null)
+            {
+                function.Invoke(null, new object[] {data, this });
+            }
             else
-                Console.WriteLine("Client -> Unknow ID: " + id);
+                Console.WriteLine("Unkknow message Id: "+id);
         }
 
         public void Close()

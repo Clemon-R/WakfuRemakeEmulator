@@ -45,11 +45,11 @@
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\AuthHandler.cs" />
     <Compile Include="Auth\AuthServer.cs" />
-    <Compile Include="Auth\Packets\PacketTemplate.cs" />
-    <Compile Include="Auth\Packets\Version.cs" />
+    <Compile Include="Auth\Messages\Version.cs" />
     <Compile Include="Common\BigEndian\BigEndianReader.cs" />
     <Compile Include="Common\BigEndian\BigEndianWriter.cs" />
-    <Compile Include="Common\Socket\Packet.cs" />
+    <Compile Include="Common\Packet.cs" />
+    <Compile Include="Common\Utils\Extension.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

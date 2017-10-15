@@ -1,26 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using WakfuRemake.Auth.Packets;
 
 namespace WakfuRemake.Auth
 {
     public static class AuthHandler
     {
-        private static Dictionary<int, EventHandler> packets = new Dictionary<int, EventHandler>();
-
-        public static void initPackets()
+        private static Type[] list;
+        public static void InitMessages()
         {
-            if (packets.Count > 0)
-                return;
-            packets.Add(7, new EventHandler(Packets.Server.Version.Instance.CallBackDecode));
+            list = Assembly.GetAssembly(typeof(AuthPacket)).GetTypes().Where(x => x.BaseType != null && x.BaseType.Name == "AuthPacket").ToArray();
+        }
+        public static Type[] GetMessages()
+        {
+            return (list);
+        }
+    }
+    public class AuthIdentifier : Attribute
+    {
+        private ushort id;
+
+        public AuthIdentifier(ushort id)
+        {
+            this.id = id;
         }
 
-        public static Dictionary<int, EventHandler> getPackets()
+        public ushort getId()
         {
-            return (packets);
+            return (this.id);
         }
+    }
+    public class AuthPacket
+    {
     }
 }

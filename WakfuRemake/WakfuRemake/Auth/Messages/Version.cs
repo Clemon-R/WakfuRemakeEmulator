@@ -7,29 +7,22 @@ using WakfuRemake.Common.BigEndian;
 
 namespace WakfuRemake.Auth.Packets.Server
 {
-    public class Version : PacketTemplate
+    public class Version : AuthPacket
     {
-        public static Version Instance = new Version(7);
-        private byte version;
-        private ushort revision;
-        private byte change;
-        private string build;
-        public Version(ushort id) : base(id)
-        {
-        }
-        public override void Decode(BigEndianReader data, AuthClient client)
+        [AuthIdentifier(7)]
+        public static void Decode(BigEndianReader data, AuthClient client)
         {
             Console.Write("Client <- Version du client: ");
-            version = data.ReadByte();
-            revision = data.ReadUShort();
-            change = data.ReadByte();
-            build = data.ReadString();
+            byte version = data.ReadByte();
+            ushort revision = data.ReadUShort();
+            byte change = data.ReadByte();
+            string build = data.ReadString();
             Console.WriteLine($"{version}.{revision}.{change}.{build}");
-            Console.WriteLine("Client -> Send version");
-            client.getSocket().Send(this.Encode().Data);
+            //Console.WriteLine("Client -> Send version");
+            //client.getSocket().Send(this.Encode().Data);
         }
 
-        public override BigEndianWriter Encode() {
+        /*public override BigEndianWriter Encode() {
             BigEndianWriter packet = new BigEndianWriter();
             packet.WriteByte(0);
             packet.WriteUShort(this.Id);
@@ -40,6 +33,6 @@ namespace WakfuRemake.Auth.Packets.Server
             packet.Seek(0, System.IO.SeekOrigin.Begin);
             packet.WriteUShort((ushort)packet.Data.Length);
             return (packet);
-        }
+        }*/
     }
 }

@@ -13,6 +13,7 @@ namespace WakfuRemake.Auth
     {
         private Socket serverSocket;
         private AutoResetEvent allDone = new AutoResetEvent(false);
+        private bool running = true;
 
         public AuthServer()
         {
@@ -21,22 +22,27 @@ namespace WakfuRemake.Auth
             this.serverSocket = new Socket(lep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             this.serverSocket.Bind(lep);
             this.serverSocket.Listen(1000);
-            AuthHandler.initPackets();
+            AuthHandler.InitMessages();
         }
 
         public void Start()
         {
             Console.WriteLine("Waiting new connection...");
-            while (true)
+            while (this.running)
             {
                 allDone.Reset();
                 this.serverSocket.BeginAccept(new AsyncCallback(this.ConnectionHandler), null);
                 allDone.WaitOne();
             }
+            Program.AuthServer = null;
+            Program.AuthServerThread = null;
+            Console.WriteLine("AuthServer Stopped");
         }
 
         public void Stop()
         {
+            this.running = false;
+            this.allDone.Set();
             this.serverSocket.Shutdown(SocketShutdown.Both);
             this.serverSocket.Close();
         }
