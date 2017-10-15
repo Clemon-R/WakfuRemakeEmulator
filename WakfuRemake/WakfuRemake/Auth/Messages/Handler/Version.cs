@@ -17,6 +17,7 @@ namespace WakfuRemake.Auth.Messages.Handler
             ushort revision = data.ReadUShort();
             byte change = data.ReadByte();
             string build = data.ReadString();
+            Config.VERSION = new object[] { version, revision, change, build};
             Console.WriteLine($"{version}.{revision}.{change}.{build}");
         }
     }

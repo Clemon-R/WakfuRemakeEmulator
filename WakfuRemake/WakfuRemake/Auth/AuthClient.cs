@@ -6,8 +6,8 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using WakfuRemake.Auth.Packets;
 using WakfuRemake.Common.BigEndian;
+using WakfuRemake.Common.Cyptography;
 using WakfuRemake.Common.Socket;
 using WakfuRemake.Common.Utils;
 
@@ -20,7 +20,9 @@ namespace WakfuRemake.Auth
         public AuthClient(Socket socket)
         {
             this.socket = socket;
+            this.Crypted = false;
             Packet packet = new Packet(8192);
+            Messages.Sender.Version.SendIpClient(this);
             this.socket.BeginReceive(packet.Buff, 0, 8191, SocketFlags.None, new AsyncCallback(this.HandlerPacket), packet);
         }
 
@@ -45,7 +47,7 @@ namespace WakfuRemake.Auth
                 }
                 if (read < 8192 && data.Length > 0)
                 {
-                    this.DispatchPacket(new BigEndianReader(data));
+                    this.DispatchPacket(Cryptography.Decode(this, data));
                     packet = new Packet(8192);
                 }
                 else
@@ -86,5 +88,7 @@ namespace WakfuRemake.Auth
         public Socket GetSocket() {
             return (this.socket);
         }
+
+        public bool Crypted { set; get; }
     }
 }
