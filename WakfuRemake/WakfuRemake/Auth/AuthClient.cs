@@ -55,7 +55,8 @@ namespace WakfuRemake.Auth
             catch (Exception e)
             {
                 Console.WriteLine("Client -> Closing client - Erreur : "+e.Message);
-                this.socket.Close();
+                this.socket?.Close();
+                this.socket = null;
             }
         }
 
@@ -78,10 +79,11 @@ namespace WakfuRemake.Auth
         public void Close()
         {
             Console.WriteLine("Client -> Closing client");
-            this.socket.Close();
+            this.socket?.Close();
+            this.socket = null;
         }
 
-        public Socket getSocket() {
+        public Socket GetSocket() {
             return (this.socket);
         }
     }
