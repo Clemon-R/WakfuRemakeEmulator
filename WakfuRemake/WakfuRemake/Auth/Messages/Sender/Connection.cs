@@ -54,6 +54,58 @@ namespace WakfuRemake.Auth.Messages.Sender
             client.GetSocket().Send(packet.Data);
         }
 
+        public static void SendAllServeur(AuthClient client)
+        {
+            BigEndianWriter packet = new BigEndianWriter();
+            packet.WriteInt(1);//Nombre de proxy
+            for (int i = 0;i < 1; i++)
+            {
+                packet.WriteInt(1);//ID proxy
+                packet.WriteString("Dathura");//Nom proxy en generale serveur
+                packet.WriteInt(0); //Communauté
+                packet.WriteString("127.0.0.1");
+                packet.WriteInt(1);//Nombre de port
+                for (int p = 0;p < 1; p++)
+                {
+                    packet.WriteInt(444);
+                }
+                packet.WriteByte(1);//Position dans la liste
+            }
+            packet.WriteInt(1);//Nombre de serveur
+            for (int i = 0;i < 1; i++)
+            {
+                packet.WriteInt(1);//Id Serveur
+
+                BigEndianWriter vers = new BigEndianWriter();
+                vers.WriteByte((byte)Config.VERSION[0]);
+                vers.WriteUShort((ushort)Config.VERSION[1]);
+                vers.WriteByte((byte)Config.VERSION[2]);
+                vers.WriteString((string)Config.VERSION[3]);
+                //Concat prop with packet
+                packet.WriteInt(vers.Data.Length);
+                packet.WriteBytes(vers.Data);
+
+                BigEndianWriter prop = new BigEndianWriter();
+                prop.WriteInt(1); //Nombre de propriété
+                //prop.WriteShort(20);//Id Propriété 
+                //prop.WriteString("false");//Valeur
+                //prop.WriteShort(208);//Id Propriété 
+                //prop.WriteString("true");//Valeur
+                //prop.WriteShort(209);//Id Propriété 
+                //prop.WriteString("0");//Valeur
+                //prop.WriteShort(210);//Id Propriété 
+                //prop.WriteString("");//Valeur
+                prop.WriteShort(420);//Serveur id
+                prop.WriteString("1");//Valeur
+                //Concat prop with packet
+                packet.WriteInt(prop.Data.Length);
+                packet.WriteBytes(prop.Data);
+
+                packet.WriteBoolean(false);//Vérrouiller
+            }
+            SendPacket(client, packet, 1036);
+        }
+
         public static void SendStateConnection(AuthClient client, byte step, bool display, int countryId, bool connectedToServer)
         {
             BigEndianWriter packet = new BigEndianWriter();
@@ -70,7 +122,7 @@ namespace WakfuRemake.Auth.Messages.Sender
                     packet.WriteInt(1); //Nombre de serveur
                     for (int i = 0; i < 1; i++)
                     {
-                        packet.WriteInt(12); //ID serveur
+                        packet.WriteInt(1); //ID serveur
                         packet.WriteInt(0);//Droit du serveur
                     }
                 }

@@ -32,6 +32,13 @@ namespace WakfuRemake.Auth.Messages.Handler
             Sender.Connection.SendRSAKey(client);
         }
 
+        [AuthIdentifier(1035)]
+        public static void RecpetionRefreshServeur(BigEndianReader packet, AuthClient client)
+        {
+            Console.WriteLine("Client - Refresh all serveur");
+            Sender.Connection.SendAllServeur(client);
+        }
+
         [AuthIdentifier(1)]
         public static void ReceptionCloseConnection(BigEndianReader packet, AuthClient client)
         {
@@ -49,11 +56,7 @@ namespace WakfuRemake.Auth.Messages.Handler
             if (user == "test" && pass == "test")
                 Sender.Connection.SendStateConnection(client, 0, true, 0, false);
             else
-                Sender.Connection.SendStateConnection(client, 2, false, 0, false);
-            /*ulong key = packet.ReadULong();
-            string user = packet.ReadString();
-            string pass = packet.ReadString();
-            Console.WriteLine($"Client <- Reception d'identification - Login: {user} Pass: {pass} Key: {key}");*/
+                Sender.Connection.SendStateConnection(client, 2, false, 0, false);//0 OK //2 Error log 5//Ban //8Compte sous protection
         }
     }
 }

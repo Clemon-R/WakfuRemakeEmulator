@@ -69,7 +69,7 @@ namespace WakfuRemake.Auth
             byte type = data.ReadByte();
             ushort id = data.ReadUShort();
             Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type}");
-            if (id != 7 && id != 1 && id != 1033)
+            if (id != 7 )
             {
                 uint size = data.ReadUInt();
                 data = CryptoManager.RSA.Decrypt(data.ReadBytes((int)data.BytesAvailable), false);
