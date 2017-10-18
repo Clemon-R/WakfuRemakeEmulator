@@ -20,7 +20,7 @@ namespace WakfuRemake.Auth
         public AuthServer()
         {
             Console.WriteLine("Initialisation of AuthServer...");
-            IPEndPoint lep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 443);
+            IPEndPoint lep = new IPEndPoint(IPAddress.Parse(Config.IP_AUTH), Config.PORT_AUTH);
             this.serverSocket = new Socket(lep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             this.serverSocket.Bind(lep);
             this.serverSocket.Listen(1000);
@@ -46,6 +46,8 @@ namespace WakfuRemake.Auth
         {
             this.running = false;
             this.allDone.Set();
+            foreach (AuthClient client in clients)
+                client.Close();
             this.serverSocket.Shutdown(SocketShutdown.Both);
             this.serverSocket.Close();
         }
@@ -56,6 +58,11 @@ namespace WakfuRemake.Auth
             AuthClient client = new AuthClient(this.serverSocket.EndAccept(result));
             clients.Add(client);
             this.allDone.Set();
+        }
+
+        public void removeClient(AuthClient client)
+        {
+            this.clients.Remove(client);
         }
     }
 }

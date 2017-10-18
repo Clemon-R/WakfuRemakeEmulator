@@ -20,7 +20,7 @@ namespace WakfuRemake.Common.Utils
             else
                 return null;
         }
-        public static Dictionary<ushort, MethodInfo> GetMessages(this Type[] list)
+        public static Dictionary<ushort, MethodInfo> GetAuthMessages(this Type[] list)
         {
             Dictionary<ushort, MethodInfo> result = new Dictionary<ushort, MethodInfo>();
             foreach (Type value in list)

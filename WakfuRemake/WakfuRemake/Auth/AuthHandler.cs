@@ -13,7 +13,7 @@ namespace WakfuRemake.Auth
         private static Dictionary<ushort, MethodInfo> listMessages;
         public static void InitMessages()
         {
-            listMessages = Assembly.GetAssembly(typeof(AuthPacket)).GetTypes().Where(x => x.BaseType != null && x.BaseType.Name == "AuthPacket").ToArray().GetMessages();
+            listMessages = Assembly.GetAssembly(typeof(AuthPacket)).GetTypes().Where(x => x.BaseType != null && x.BaseType == typeof(AuthPacket)).ToArray().GetAuthMessages();
         }
         public static MethodInfo GetMethod(ushort id)
         {
