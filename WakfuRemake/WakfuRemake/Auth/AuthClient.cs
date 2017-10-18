@@ -6,6 +6,8 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using WakfuRemake.Auth.Messages;
+using WakfuRemake.Auth.Messages.Handler;
 using WakfuRemake.Common.BigEndian;
 using WakfuRemake.Common.Cryptography;
 using WakfuRemake.Common.Socket;
@@ -16,13 +18,14 @@ namespace WakfuRemake.Auth
     public class AuthClient
     {
         private Socket socket;
+        public bool Crypted { get; set; }
 
         public AuthClient(Socket socket)
         {
             this.socket = socket;
             this.Crypted = false;
             Packet packet = new Packet(8192);
-            Messages.Sender.Connection.SendIpClient(this);
+            Connection.SerializeIp(this);
             this.socket.BeginReceive(packet.Buff, 0, 8191, SocketFlags.None, new AsyncCallback(this.HandlerPacket), packet);
         }
 
@@ -46,9 +49,9 @@ namespace WakfuRemake.Auth
                     Array.Copy(packet.Bytes, 0, data, 0, packet.Bytes.Length);
                     Array.Copy(packet.Buff, 0, data, packet.Bytes.Length, read);
                 }
-                if (read < 8192 && data.Length > 0)
+                if (read <= 8192 && data.Length > 0)
                 {
-                    this.DispatchPacket(new BigEndianReader(data));
+                    this.DispatchPacket(data);
                     packet = new Packet(8192);
                 }
                 else
@@ -63,25 +66,38 @@ namespace WakfuRemake.Auth
             }
         }
 
-        private void DispatchPacket(BigEndianReader data)
+        private void DispatchPacket(byte[] data)
         {
-            ushort len = data.ReadUShort();
-            byte type = data.ReadByte();
-            ushort id = data.ReadUShort();
-            Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type}");
-            if (id != 7 )
+            BigEndianReader packet = new BigEndianReader(data);
+            ushort len = packet.ReadUShort();
+            byte type = packet.ReadByte();
+            ushort id = packet.ReadUShort();
+            MessageHeader header = new MessageHeader(id, type, len);
+            if (this.Crypted)
             {
-                uint size = data.ReadUInt();
-                data = CryptoManager.RSA.Decrypt(data.ReadBytes((int)data.BytesAvailable), false);
+                uint size = packet.ReadUInt();//Useless size without crypted byte
+                packet = CryptoManager.RSA.Decrypt(packet.ReadBytes((int)packet.BytesAvailable), false);
             }
-            MethodInfo function = null;
-            AuthHandler.GetMessages().FirstOrDefault(x => (function = x.GetMethods().GetMessageMethod(id)) != null);
+            Message msg = new Message(header, new MessageContent(data, packet));
+            Console.WriteLine($"Client <- Message ID: {id} Len: {len} Type: {type} = {data.ToHex()}");
+            MethodInfo function = AuthMessage.GetMethod(id);
             if (function != null)
-            {
-                function.Invoke(null, new object[] {data, this });
-            }
+                function.Invoke(null, new object[] {msg, this });
             else
                 Console.WriteLine("Unkknow message Id: "+id);
+        }
+
+        public void Send(ushort id, BigEndianWriter arg)
+        {
+            BigEndianWriter packet = new BigEndianWriter();
+            ushort len;
+
+            packet.WriteUShort((len = (ushort)(arg.Data.Length + 4)));
+            packet.WriteUShort(id);
+
+            packet.WriteBytes(arg.Data);
+            Console.WriteLine($"Client -> Send ID: {id} Len: {len} = {packet.Data.ToHex()}");
+            socket.Send(packet.Data);
         }
 
         public void Close()
@@ -94,7 +110,5 @@ namespace WakfuRemake.Auth
         public Socket GetSocket() {
             return (this.socket);
         }
-
-        public bool Crypted { set; get; }
     }
 }

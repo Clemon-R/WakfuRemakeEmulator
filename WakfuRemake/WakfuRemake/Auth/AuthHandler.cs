@@ -4,19 +4,20 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using WakfuRemake.Common.Utils;
 
 namespace WakfuRemake.Auth
 {
-    public static class AuthHandler
+    public static class AuthMessage
     {
-        private static Type[] list;
+        private static Dictionary<ushort, MethodInfo> listMessages;
         public static void InitMessages()
         {
-            list = Assembly.GetAssembly(typeof(AuthPacket)).GetTypes().Where(x => x.BaseType != null && x.BaseType.Name == "AuthPacket").ToArray();
+            listMessages = Assembly.GetAssembly(typeof(AuthPacket)).GetTypes().Where(x => x.BaseType != null && x.BaseType.Name == "AuthPacket").ToArray().GetMessages();
         }
-        public static Type[] GetMessages()
+        public static MethodInfo GetMethod(ushort id)
         {
-            return (list);
+            return (listMessages.ContainsKey(id) ? listMessages[id] : null);
         }
     }
     public class AuthIdentifier : Attribute

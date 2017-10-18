@@ -15,6 +15,7 @@ namespace WakfuRemake.Auth
         private Socket serverSocket;
         private AutoResetEvent allDone = new AutoResetEvent(false);
         private bool running = true;
+        private List<AuthClient> clients = new List<AuthClient>();
 
         public AuthServer()
         {
@@ -23,7 +24,7 @@ namespace WakfuRemake.Auth
             this.serverSocket = new Socket(lep.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             this.serverSocket.Bind(lep);
             this.serverSocket.Listen(1000);
-            AuthHandler.InitMessages();
+            AuthMessage.InitMessages();
             CryptoManager.InitRSA();
         }
 
@@ -53,6 +54,7 @@ namespace WakfuRemake.Auth
         {
             Console.WriteLine("New connection");
             AuthClient client = new AuthClient(this.serverSocket.EndAccept(result));
+            clients.Add(client);
             this.allDone.Set();
         }
     }

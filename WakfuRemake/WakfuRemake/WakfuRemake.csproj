@@ -45,8 +45,14 @@
     <Compile Include="Auth\AuthClient.cs" />
     <Compile Include="Auth\AuthHandler.cs" />
     <Compile Include="Auth\AuthServer.cs" />
-    <Compile Include="Auth\Messages\Handler\Connection.cs" />
-    <Compile Include="Auth\Messages\Sender\Connection.cs" />
+    <Compile Include="Auth\Messages\Protocol\Connection.cs" />
+    <Compile Include="Auth\Messages\Protocol\Login.cs" />
+    <Compile Include="Auth\Messages\Protocol\Server.cs" />
+    <Compile Include="Auth\Messages\Protocol\Version.cs" />
+    <Compile Include="Auth\Messages\Message.cs" />
+    <Compile Include="Auth\Messages\MessageConstant.cs" />
+    <Compile Include="Auth\Messages\MessageContent.cs" />
+    <Compile Include="Auth\Messages\MessageHeader.cs" />
     <Compile Include="Common\BigEndian\BigEndianReader.cs" />
     <Compile Include="Common\BigEndian\BigEndianWriter.cs" />
     <Compile Include="Common\Cyptography\AsnKeyBuilder.cs" />
@@ -61,6 +67,8 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Auth\Models\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

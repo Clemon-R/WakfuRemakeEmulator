@@ -230,7 +230,7 @@ namespace WakfuRemake.Common.BigEndian
         {
             var bytes = Encoding.UTF8.GetBytes(str);
             var len = (ushort)bytes.Length;
-            WriteUShort(len);
+            WriteInt(len);
 
             int i;
             for (i = 0; i < len; i++)
@@ -240,7 +240,7 @@ namespace WakfuRemake.Common.BigEndian
         public void WriteString(string str)
         {
             var bytes = Encoding.UTF8.GetBytes(str);
-            var len = (byte)bytes.Length;
+            byte len = (byte)bytes.Length;
             WriteByte(len);
 
             int i;

@@ -229,7 +229,7 @@ namespace WakfuRemake.Common.BigEndian
         /// <returns></returns>
         public string ReadUTF()
         {
-            ushort length = ReadUShort();
+            int length = ReadInt();
 
             byte[] bytes = ReadBytes(length);
             return Encoding.UTF8.GetString(bytes);
@@ -237,9 +237,9 @@ namespace WakfuRemake.Common.BigEndian
 
         public string ReadString()
         {
-            ushort length = ReadByte();
+            long length = ReadByte();
 
-            byte[] bytes = ReadBytes(length);
+            byte[] bytes = ReadBytes((int)length);
             return Encoding.UTF8.GetString(bytes);
         }
 
