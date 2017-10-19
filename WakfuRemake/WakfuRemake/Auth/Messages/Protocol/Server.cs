@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WakfuRemake.Auth.Manager;
 using WakfuRemake.Common.BigEndian;
+using static WakfuRemake.Auth.Models.Server;
 
 namespace WakfuRemake.Auth.Messages.Handler
 {
@@ -18,76 +20,43 @@ namespace WakfuRemake.Auth.Messages.Handler
 
         public static void Serialize(AuthClient client)
         {
+            byte i = 0;
             BigEndianWriter packet = new BigEndianWriter();
-            packet.WriteInt(1);
-            packet.WriteInt(1);
-            packet.WriteUTF("Dathura");
-            packet.WriteInt(0);
-            packet.WriteUTF("127.0.0.1");
-            packet.WriteInt(1);
-            packet.WriteInt(444);
-            packet.WriteByte(0);
-
-            packet.WriteInt(1);
-            packet.WriteInt(1);
-            BigEndianWriter vers = new BigEndianWriter();
-            vers.WriteByte((byte)Config.VERSION[0]);
-            vers.WriteUShort((ushort)Config.VERSION[1]);
-            vers.WriteByte((byte)Config.VERSION[2]);
-            vers.WriteString((string)Config.VERSION[3]);
-            //Concat prop with packet
-            packet.WriteInt(vers.Data.Length);
-            packet.WriteBytes(vers.Data);
-            packet.WriteInt(0);
-            //packet.WriteShort(420);
-            //packet.WriteString("1");
-            packet.WriteBoolean(false);
-            /*packet.WriteInt(1);//Nombre de proxy
-            for (int i = 0;i < 1; i++)
+            BigEndianWriter part2 = new BigEndianWriter();
+            packet.WriteInt(World.Servers.Count);
+            part2.WriteInt(World.Servers.Count);
+            foreach (Models.Server server in World.Servers)
             {
-                packet.WriteInt(2);//ID proxy
-                packet.WriteString("Dathura", 4);//Nom proxy en generale serveur
-                packet.WriteInt(0); //Communauté
-                packet.WriteString("127.0.0.1", 4);
-                packet.WriteInt(1);//Nombre de port
-                for (int p = 0;p < 1; p++)
+                packet.WriteInt(server.ID);
+                packet.WriteUTF(server.Name);
+                packet.WriteInt((int)server.Community);
+                packet.WriteUTF(server.Ip);
+                packet.WriteInt(server.Ports.Count);
+                foreach (int port in server.Ports)
+                    packet.WriteInt(port);
+                packet.WriteByte(i);
+
+                part2.WriteInt(server.ID);
+                BigEndianWriter version = new BigEndianWriter();
+                version.WriteByte((byte)Config.VERSION[0]);
+                version.WriteUShort((ushort)Config.VERSION[1]);
+                version.WriteByte((byte)Config.VERSION[2]);
+                version.WriteString((string)Config.VERSION[3]);
+                part2.WriteInt(version.Data.Length);
+                part2.WriteBytes(version.Data);
+                BigEndianWriter propertys = new BigEndianWriter();
+                propertys.WriteInt(server.Propertys.Count);
+                foreach (KeyValuePair<PropertyID, string> prop in server.Propertys)
                 {
-                    packet.WriteInt(444);
+                    propertys.WriteShort((short)prop.Key);
+                    propertys.WriteUTF(prop.Value);
                 }
-                packet.WriteByte(0);//Position dans la liste
+                part2.WriteInt(propertys.Data.Length);
+                part2.WriteBytes(propertys.Data);
+                part2.WriteBoolean(server.Locked);
+                i++;
             }
-            packet.WriteInt(1);//Nombre de serveur
-            for (int i = 0;i < 1; i++)
-            {
-                packet.WriteInt(1);//Id Serveur
-
-                BigEndianWriter vers = new BigEndianWriter();
-                vers.WriteByte((byte)Config.VERSION[0]);
-                vers.WriteUShort((ushort)Config.VERSION[1]);
-                vers.WriteByte((byte)Config.VERSION[2]);
-                vers.WriteString((string)Config.VERSION[3]);
-                //Concat prop with packet
-                packet.WriteInt(vers.Data.Length);
-                packet.WriteBytes(vers.Data);
-
-                BigEndianWriter prop = new BigEndianWriter();
-                prop.WriteInt(0); //Nombre de propriété
-                //prop.WriteShort(20);//Id Propriété 
-                //prop.WriteString("false");//Valeur
-                //prop.WriteShort(208);//Id Propriété 
-                //prop.WriteString("true");//Valeur
-                //prop.WriteShort(209);//Id Propriété 
-                //prop.WriteString("0");//Valeur
-                //prop.WriteShort(210);//Id Propriété 
-                //prop.WriteString("");//Valeur
-                //prop.WriteShort(420);//Serveur id
-                //prop.WriteString("1", 4);//Valeur
-                //Concat prop with packet
-                packet.WriteInt(prop.Data.Length);
-                packet.WriteBytes(prop.Data);
-
-                packet.WriteBoolean(false);//Vérrouiller
-            }*/
+            packet.WriteBytes(part2.Data);
             client.Send(MessageConstant.S_LIST_SERVER, packet);
         }
     }

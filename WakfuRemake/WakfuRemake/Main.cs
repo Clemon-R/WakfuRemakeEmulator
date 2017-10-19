@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WakfuRemake.Auth;
+using WakfuRemake.Auth.Manager;
 
 namespace WakfuRemake
 {
@@ -16,8 +17,12 @@ namespace WakfuRemake
         static void Main(string[] args)
         {
             Console.WriteLine("Initialisation of the emulator...");
+            Console.WriteLine("Initialisation of the world...");
+            World.InitWorld();
+            Console.WriteLine("Initialisiation of authserver...");
             AuthServerThread = new Thread(new ThreadStart((AuthServer = new AuthServer()).Start));
-            AuthServer.Start();
+            AuthServerThread.Start();
+            Console.WriteLine("End of the initilisation of the world !");
         }
     }
 }
